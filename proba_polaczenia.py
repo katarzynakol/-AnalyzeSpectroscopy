@@ -45,19 +45,20 @@ driver.get(url)
 
 try:
     # Znajdź pole "Compound Name" i wpisz "Hexane"
-    compound_name_input = WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.NAME, 'COMPOUND_NAME')))
+    compound_name_input = WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.NAME, 'compname')))
     compound_name_input.send_keys('Hexane')
 
     # Znajdź pole "Spectrum" i wybierz "MS" z rozwijanej listy
-    spectrum_select = WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.NAME, 'SPECTRUM')))
-    spectrum_select.send_keys('MS')
+    ms_checkbox = WebDriverWait(driver, 10).until(
+        EC.presence_of_element_located((By.CSS_SELECTOR, 'input[name="spectrum"][value="1"]')))
+    ms_checkbox.click()
 
     # Kliknij przycisk "Search"
-    search_button = WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.XPATH, '//input[@value="Search IR Spectra"]')))
+    search_button = WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.XPATH, '//input[@onclick="return searchLogging();"]')))
     search_button.click()
 
     # Poczekaj na załadowanie wyników (możesz dostosować czas oczekiwania według potrzeb)
-    wait = WebDriverWait(driver, 10)
+    wait = WebDriverWait(driver, 100)
     wait.until(EC.presence_of_element_located((By.XPATH, '//table[@class="frame"]')))
 
     # Pobierz zawartość wyników
