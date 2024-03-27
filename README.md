@@ -1,6 +1,6 @@
 # -AnalyzeSpectroscopy
 
-# Temat projektu - Analiza danych spektroskopowych w celu identyfikacji i charakteryzacji związków chemicznych
+# Analiza danych spektroskopowych w celu identyfikacji i charakteryzacji związków chemicznych
 
 ## Opis projektu
 
