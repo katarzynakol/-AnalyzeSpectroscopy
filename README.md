@@ -1,4 +1,4 @@
-# -AnalyzeSpectroscopy
+# AnalyzeSpectroscopy
 
 # Analiza danych spektroskopowych w celu identyfikacji i charakteryzacji związków chemicznych
 
