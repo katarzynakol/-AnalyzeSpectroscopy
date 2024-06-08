@@ -18,4 +18,4 @@ Projekt ma na celu stworzenie aplikacji do analizy danych spektroskopowych zwią
 
 - Python 3.10: Język programowania, który posłuży do implementacji logiki analizy danych oraz interakcji z bazą danych.
 - Flask: Framework webowy, który umożliwi stworzenie interfejsu użytkownika oraz udostępnienie aplikacji w przeglądarce internetowej.
-- Baza danych: Wykorzystamy bazę danych do przechowywania i zarządzania danymi spektroskopowymi.
+- Baza danych: PostgreSQL - Wykorzystamy bazę danych do przechowywania i zarządzania danymi spektroskopowymi.
