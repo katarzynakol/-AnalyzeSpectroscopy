@@ -133,6 +133,28 @@
     </div>
 </div>
 
+<p></p>
+
+<div class="row mt-4 justify-content-center">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                Analyze Uploaded Files
+            </div>
+                <form action="{{ url_for('analyse_files') }}" method="post" enctype="multipart/form-data">
+                    <div class="form-group text-center mb-3">
+                        {% for file in files %}
+                            <p></p>
+                            <input type="hidden" name="file" value="{{ file }}" multiple style="display: none;">
+                        {% endfor %}
+                        <p></p>
+                        <button type="submit" class="btn btn-primary">Analyze</button>
+                    </div>
+                </form>
+        </div>
+    </div>
+</div>
+
     <script>
 const input = document.querySelector("input");
 const preview = document.querySelector(".preview");

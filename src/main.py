@@ -1,5 +1,7 @@
 import os
 from flask import Flask, request, redirect, url_for, render_template
+from flask_sqlalchemy import SQLAlchemy
+from flask_migrate import Migrate
 from werkzeug.utils import secure_filename
 from src.analysis.nmr_analysis import analyse_nmr_image, compare_with_database
 
@@ -9,6 +11,35 @@ ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
 
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+
+# Konfiguracja bazy danych
+DB_USERNAME = 'dsqa_s442846'  # Twój login do bazy danych
+DB_PASSWORD = 'adeworapadostri'  # Twoje hasło do bazy danych
+DB_HOST = 'psql.wmi.amu.edu.pl'  # Adres serwera
+DB_PORT = '5432'  # Port bazy danych
+DB_NAME = 'dsqa_s442846'  # Nazwa bazy danych
+
+app.config['SQLALCHEMY_DATABASE_URI'] = f'postgresql://{DB_USERNAME}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}'
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
+db = SQLAlchemy(app)
+migrate = Migrate(app, db)
+
+# Model danych dla tabeli `dane_spektroskopowe`
+class DaneSpektroskopowe(db.Model):
+    __tablename__ = 'dane_spektroskopowe'
+    id = db.Column(db.Integer, primary_key=True)
+    compound_id = db.Column(db.Integer, db.ForeignKey('zwiazki.id'))
+    ppm = db.Column(db.Float)
+    hz = db.Column(db.Float)
+    intensity = db.Column(db.Float)
+
+# Model danych dla tabeli `zwiazki_chemiczne`
+class ZwiazkiChemiczne(db.Model):
+    __tablename__ = 'zwiazki_chemiczne'
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String)
+    formula = db.Column(db.String)
 
 # Upewnij się, że folder istnieje
 if not os.path.exists(UPLOAD_FOLDER):
@@ -49,7 +80,7 @@ def upload_file():
             uploaded_files.append(file_path)
 
     # Przekażemy pliki bezpośrednio do funkcji analizy
-    return render_template('analyse.html', files=uploaded_files)
+    return render_template('index.html', files=uploaded_files)
 @app.route('/analysis', methods=['POST'])
 def analyse_files():
     file_paths = request.form.getlist('file')
@@ -76,6 +107,24 @@ def analyse_files():
         matches.extend(match)
 
     return render_template('results.html', results=results, matches=matches)
+
+# @app.route('/data')
+# def show_data():
+#     dane = DaneSpektroskopowe.query.all()
+#     zwiazki = ZwiazkiChemiczne.query.all()
+#     return render_template('data.html', dane=dane, zwiazki=zwiazki)
+#
+# @app.route('/add', methods=['POST'])
+# def add_data():
+#     new_data = DaneSpektroskopowe(
+#         compound_id=request.form['compound_id'],
+#         ppm=request.form['ppm'],
+#         hz=request.form['hz'],
+#         intensity=request.form['intensity']
+#     )
+#     db.session.add(new_data)
+#     db.session.commit()
+#     return redirect(url_for('show_data'))
 
 if __name__ == '__main__':
     app.run(debug=True)
