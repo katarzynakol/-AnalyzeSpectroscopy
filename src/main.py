@@ -3,7 +3,7 @@ from flask import Flask, request, redirect, url_for, render_template
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from werkzeug.utils import secure_filename
-from src.analysis.nmr_analysis import analyse_nmr_image, compare_with_database
+from analysis.nmr_analysis import analyse_nmr_image, compare_with_database
 
 # Konfiguracja ścieżki do folderu uploads
 UPLOAD_FOLDER = os.path.join(os.getcwd(), 'upload')
@@ -29,7 +29,7 @@ migrate = Migrate(app, db)
 class DaneSpektroskopowe(db.Model):
     __tablename__ = 'dane_spektroskopowe'
     id = db.Column(db.Integer, primary_key=True)
-    compound_id = db.Column(db.Integer, db.ForeignKey('zwiazki.id'))
+    compound_id = db.Column(db.Integer, db.ForeignKey('zwiazki_chemiczne.id'))
     ppm = db.Column(db.Float)
     hz = db.Column(db.Float)
     intensity = db.Column(db.Float)
@@ -103,7 +103,7 @@ def analyse_files():
 
     matches = []
     for result in results:
-        match = compare_with_database(result['peaks_ppm'], result['peaks_hz'], result['intensity'], database)
+        match = compare_with_database(result['peaks_ppm'], result['peaks_hz'], result['intensity'])
         matches.extend(match)
 
     return render_template('results.html', results=results, matches=matches)
