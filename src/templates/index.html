@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SpectraAnalyzer</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        #drop-area {
+            border: 2px dashed #ccc;
+            border-radius: 20px;
+            width: 100%;
+            max-width: 600px;
+            padding: 20px;
+            margin: 20px auto;
+            text-align: center;
+        }
+
+        #image-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        .uploaded-image {
+            position: relative;
+            max-width: 100px;
+            max-height: 100px;
+            margin: 10px;
+        }
+
+        .uploaded-image img {
+            max-width: 100%;
+            max-height: 100%;
+            margin: 10px;
+            border-radius: 10px;
+            border: 1px solid #ddd;
+        }
+        .custom-btn {
+            background-color: none;
+            border: none;
+            color: black;
+            font-weight: bold; /* Pogrubienie tekstu */
+            text-decoration: underline; /* Podkreślenie tekstu */
+            padding: 10px 20px; /* Dodaj padding */
+            text-align: center; /* Wyrównanie tekstu */
+            display: inline-block; /* Ustawienie bloku jako inline */
+        }
+
+        .custom-btn:hover {
+            background-color: red; /* Kolor tła podczas najechania */
+        }
+
+        .custom-btn:focus {
+            outline: none; /* Usuń obramowanie na focus */
+            box-shadow: none; /* Usuń cień na focus */
+        }
+        .remove-btn {
+            position: absolute;
+            top: 0;
+            right: 0;
+            background: none;
+            color: black;
+            border: none;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            text-align: center;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 16px;
+            z-index: 1; /* Dodaj z-index, aby przycisk był na wierzchu */
+        }
+    </style>
+</head>
+<body>
+        <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+            <a class="navbar-brand" >SpectraAnalyzer</a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                <ul class="navbar-nav mr-auto">
+                    <li class="nav-item active">
+                        <a class="nav-link" href="/">Home <span class="sr-only">(current)</span></a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/tables">Spectral Tables</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/about">About</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/contact">Contact</a>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+
+        <div class="jumbotron">
+            <h1 class="display-4">Welcome to SpectraAnalyzer!</h1>
+            <p class="lead">SpectraAnalyzer is a web application for analyzing spectroscopic data.</p>
+            <hr class="my-4">
+            <p>Upload your spectroscopic data and get insights instantly!</p>
+            <a class="btn custom-btn" href="/about" role="button">Learn more</a>
+        </div>
+
+<div class="row mt-4 justify-content-center">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                Upload Spectroscopic Data
+            </div>
+            <form action="/upload" method="post" enctype="multipart/form-data">
+                <div class="form-group text-center mb-3">
+                    <p></p>
+                    <label for="file">Choose images to upload (PNG, JPG, JPEG)</label><br>
+                    <input type="file" class="form-control-file mx-auto" id="file" name="file" accept=".jpg, .jpeg, .png" multiple style="display: none;">
+                    <p></p>
+                    <label for="file" class="btn btn-primary">Select Files</label>
+                </div>
+                <div class="preview mb-3 text-center">
+<!--                    <p>No files currently selected for upload</p>-->
+                    <p></p>
+                </div>
+                <button type="submit" class="btn btn-primary btn-block">Upload</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+    <script>
+const input = document.querySelector("input");
+const preview = document.querySelector(".preview");
+
+input.addEventListener("change", updateImageDisplay);
+
+function updateImageDisplay() {
+    // Usunięcie poprzednich obrazów przed aktualizacją
+    while (preview.firstChild) {
+        preview.removeChild(preview.firstChild);
+    }
+
+    const curFiles = input.files;
+    if (curFiles.length === 0) {
+        // Jeśli nie wybrano żadnych plików, wyświetl komunikat
+        const para = document.createElement("p");
+        para.textContent = "No files currently selected for upload";
+        preview.appendChild(para);
+    } else {
+        // Iteracja przez wybrane pliki i wyświetlenie ich podglądu
+        for (let i = 0; i < curFiles.length; i++) {
+            const file = curFiles[i];
+            const listItem = document.createElement("li");
+            const para = document.createElement("p");
+            if (validFileType(file)) {
+                para.textContent = `File name: ${file.name}, file size ${returnFileSize(file.size)}.`;
+                const image = document.createElement("img");
+                image.src = URL.createObjectURL(file);
+                image.alt = image.title = file.name;
+
+                // Zastosuj styl CSS do zminimalizowania zdjęcia
+                image.style.maxWidth = "100px"; // Maksymalna szerokość
+                image.style.maxHeight = "100px"; // Maksymalna wysokość
+
+                // Dodanie przycisku "x"
+                const removeButton = document.createElement("button");
+                removeButton.textContent = "x";
+                removeButton.className = "remove-btn";
+                removeButton.addEventListener("click", function() {
+                    listItem.remove(); // Usunięcie elementu listy (zdjęcia i przycisku)
+                });
+                listItem.appendChild(image);
+                listItem.appendChild(removeButton);
+                listItem.appendChild(para);
+
+                // Dodanie do listy
+                preview.appendChild(listItem);
+            } else {
+                para.textContent = `File name: ${file.name}: Not a valid file type. Update your selection.`;
+                preview.appendChild(para);
+            }
+        }
+    }
+}
+
+const fileTypes = [
+    "image/apng",
+    "image/bmp",
+    "image/gif",
+    "image/jpeg",
+    "image/pjpeg",
+    "image/png",
+    "image/svg+xml",
+    "image/tiff",
+    "image/webp",
+    "image/x-icon",
+];
+
+function validFileType(file) {
+    return fileTypes.includes(file.type);
+}
+
+function returnFileSize(number) {
+    if (number < 1024) {
+        return `${number} bytes`;
+    } else if (number >= 1024 && number < 1048576) {
+        return `${(number / 1024).toFixed(1)} KB`;
+    } else if (number >= 1048576) {
+        return `${(number / 1048576).toFixed(1)} MB`;
+    }
+}
+
+    </script>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>
