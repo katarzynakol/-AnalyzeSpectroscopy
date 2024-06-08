@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Dane Spektroskopowe</title>
+</head>
+<body>
+    <h1>Dane Spektroskopowe</h1>
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Związek</th>
+                <th>ppm</th>
+                <th>Hz</th>
+                <th>Intensywność</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for dane in dane %}
+            <tr>
+                <td>{{ dane.id }}</td>
+                <td>{{ dane.compound_id }}</td>
+                <td>{{ dane.ppm }}</td>
+                <td>{{ dane.hz }}</td>
+                <td>{{ dane.intensity }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>
+

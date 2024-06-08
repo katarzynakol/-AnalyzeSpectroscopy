@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analysis Results</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+<body>
+        <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+            <a class="navbar-brand" >SpectraAnalyzer</a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                <ul class="navbar-nav mr-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/">Home </a>
+                    </li>
+                    <li class="nav-item active">
+                        <a class="nav-link" href="/results">Results <span class="sr-only">(current)</span> </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/tables">Spectral Tables</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/about">About</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/contact">Contact</a>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+    <h1>Results of NMR Analysis</h1>
+    {% for result in results %}
+        <h2>File: {{ results.file }}</h2>
+        <p>Piki ppm: {{ result.peaks_ppm }}</p>
+        <p>Piki Hz: {{ result.peaks_hz }}</p>
+        <p>Intensywność: {{ result.intensity }}</p>
+    {% endfor %}
+
+    <h1>Matched Compounds</h1>
+    {% for match in matches %}
+        <p>Compound: {{ match.compound }}</p>
+    {% endfor %}
+
+<!--<h1>Dane Spektroskopowe</h1>-->
+<!--    <table>-->
+<!--        <thead>-->
+<!--            <tr>-->
+<!--                <th>ID</th>-->
+<!--                <th>Związek</th>-->
+<!--                <th>ppm</th>-->
+<!--                <th>Hz</th>-->
+<!--                <th>Intensywność</th>-->
+<!--            </tr>-->
+<!--        </thead>-->
+<!--        <tbody>-->
+<!--            {% for dane in dane %}-->
+<!--            <tr>-->
+<!--                <td>{{ dane.id }}</td>-->
+<!--                <td>{{ dane.compound_id }}</td>-->
+<!--                <td>{{ dane.ppm }}</td>-->
+<!--                <td>{{ dane.hz }}</td>-->
+<!--                <td>{{ dane.intensity }}</td>-->
+<!--            </tr>-->
+<!--            {% endfor %}-->
+<!--        </tbody>-->
+<!--    </table>-->
+</body>
+</html>
