@@ -86,6 +86,9 @@
                         <a class="nav-link" href="/">Home <span class="sr-only">(current)</span></a>
                     </li>
                     <li class="nav-item">
+                        <a class="nav-link" href="/results">Results</a>
+                    </li>
+                    <li class="nav-item">
                         <a class="nav-link" href="/tables">Spectral Tables</a>
                     </li>
                     <li class="nav-item">
@@ -112,7 +115,7 @@
             <div class="card-header">
                 Upload Spectroscopic Data
             </div>
-            <form action="/upload" method="post" enctype="multipart/form-data">
+            <form action="{{ url_for('upload_file') }}" method="post" enctype="multipart/form-data">
                 <div class="form-group text-center mb-3">
                     <p></p>
                     <label for="file">Choose images to upload (PNG, JPG, JPEG)</label><br>
