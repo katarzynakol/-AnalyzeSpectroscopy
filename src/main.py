@@ -1,9 +1,13 @@
 import os
-from flask import Flask, request, redirect, url_for, render_template
+import base64
+from flask import Flask, request, render_template, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from werkzeug.utils import secure_filename
-from analysis.nmr_analysis import analyse_nmr_image, compare_with_database
+from io import BytesIO
+from PIL import Image
+import numpy as np
+from scipy.signal import savgol_filter, find_peaks
 
 # Konfiguracja ścieżki do folderu uploads
 UPLOAD_FOLDER = os.path.join(os.getcwd(), 'upload')
@@ -13,11 +17,11 @@ app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 # Konfiguracja bazy danych
-DB_USERNAME = 'dsqa_s442846'  # Twój login do bazy danych
-DB_PASSWORD = 'adeworapadostri'  # Twoje hasło do bazy danych
-DB_HOST = 'psql.wmi.amu.edu.pl'  # Adres serwera
-DB_PORT = '5432'  # Port bazy danych
-DB_NAME = 'dsqa_s442846'  # Nazwa bazy danych
+DB_USERNAME = 'dsqa_s442846'
+DB_PASSWORD = 'adeworapadostri'
+DB_HOST = 'psql.wmi.amu.edu.pl'
+DB_PORT = '5432'
+DB_NAME = 'dsqa_s442846'
 
 app.config['SQLALCHEMY_DATABASE_URI'] = f'postgresql://{DB_USERNAME}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
@@ -69,7 +73,7 @@ def upload_file():
     if 'file' not in request.files:
         return 'No file part'
 
-    files = request.files.getlist('file')  # Wczytaj wszystkie pliki
+    files = request.files.getlist('file')
     uploaded_files = []
 
     for file in files:
@@ -79,53 +83,39 @@ def upload_file():
             file.save(file_path)
             uploaded_files.append(file_path)
 
-    # Przekażemy pliki bezpośrednio do funkcji analizy
     return render_template('index.html', files=uploaded_files)
-@app.route('/analysis', methods=['POST'])
-def analyse_files():
-    file_paths = request.form.getlist('file')
-    results = []
 
-    for file_path in file_paths:
-        peaks_ppm, peaks_hz, intensity = analyse_nmr_image(file_path)
-        results.append({
-            'file': file_path,
-            'peaks_ppm': peaks_ppm,
-            'peaks_hz': peaks_hz,
-            'intensity': intensity
-        })
+@app.route('/analyze', methods=['POST'])
+def analyze():
+    data = request.get_json()
+    roi = data['roi']
+    image_data = data['image']
 
-    # Przykładowa baza danych
-    database = [
-        {'compound': 'Substancja A', 'ppm': 1.0, 'hz': 400, 'intensity': 100},
-        {'compound': 'Substancja B', 'ppm': 2.0, 'hz': 800, 'intensity': 150},
-    ]
+    # Decode the image data
+    image_data = base64.b64decode(image_data.split(",")[1])
+    image = Image.open(BytesIO(image_data)).convert('L')
+    image_array = np.array(image)
 
-    matches = []
-    for result in results:
-        match = compare_with_database(result['peaks_ppm'], result['peaks_hz'], result['intensity'])
-        matches.extend(match)
+    # Extract the region of interest
+    roi_image = image_array[roi['startY']:roi['endY'], roi['startX']:roi['endX']]
 
-    return render_template('results.html', results=results, matches=matches)
+    # Analyze the ROI
+    spectrum = np.sum(roi_image, axis=0)
+    spectrum_normalized = 100 * (spectrum - np.min(spectrum)) / (np.max(spectrum) - np.min(spectrum))
+    smoothed_spectrum = savgol_filter(spectrum_normalized, window_length=51, polyorder=3)
+    inverted_spectrum = np.max(smoothed_spectrum) - smoothed_spectrum
+    minima, _ = find_peaks(inverted_spectrum, height=np.max(inverted_spectrum) * 0.1, distance=20)
+    boundary_margin = 50
+    valid_minima = minima[(minima > boundary_margin) & (minima < (len(spectrum) - boundary_margin))]
+    x_values = np.linspace(4000, 400, len(spectrum))
+    detected_minima = x_values[valid_minima]
+    minima_intensities = smoothed_spectrum[valid_minima]
 
-# @app.route('/data')
-# def show_data():
-#     dane = DaneSpektroskopowe.query.all()
-#     zwiazki = ZwiazkiChemiczne.query.all()
-#     return render_template('data.html', dane=dane, zwiazki=zwiazki)
-#
-# @app.route('/add', methods=['POST'])
-# def add_data():
-#     new_data = DaneSpektroskopowe(
-#         compound_id=request.form['compound_id'],
-#         ppm=request.form['ppm'],
-#         hz=request.form['hz'],
-#         intensity=request.form['intensity']
-#     )
-#     db.session.add(new_data)
-#     db.session.commit()
-#     return redirect(url_for('show_data'))
+    result = {
+        'minima_positions': detected_minima.tolist(),
+        'minima_intensities': minima_intensities.tolist()
+    }
+    return jsonify(result)
 
 if __name__ == '__main__':
     app.run(debug=True)
-
