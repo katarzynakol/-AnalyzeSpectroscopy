@@ -99,9 +99,6 @@
                     <a class="nav-link" href="/">Home <span class="sr-only">(current)</span></a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="/results">Results</a>
-                </li>
-                <li class="nav-item">
                     <a class="nav-link" href="/tables">Spectral Tables</a>
                 </li>
                 <li class="nav-item">
@@ -136,10 +133,16 @@
                         <p></p>
                         <label for="file" class="btn btn-primary">Select Files</label>
                     </div>
+                    <div class="form-group text-center mb-3">
+                        <label>Select Spectrum Type:</label><br>
+                        <input type="radio" id="ir" name="spectrum_type" value="IR" checked>
+                        <label for="ir">IR</label><br>
+                        <input type="radio" id="nmr" name="spectrum_type" value="NMR">
+                        <label for="nmr">1H NMR</label>
+                    </div>
                     <div class="preview mb-3 text-center">
                         <p></p>
                     </div>
-                    <button type="submit" class="btn btn-primary btn-block">Upload</button>
                 </form>
             </div>
         </div>
@@ -150,154 +153,151 @@
         <button id="analyze-btn" class="btn btn-primary mt-3">Analyze Selected Area</button>
     </div>
 
+    <script>
+        const input = document.querySelector("input[type='file']");
+        const preview = document.querySelector(".preview");
+        const canvas = document.getElementById("image-canvas");
+        const ctx = canvas.getContext("2d");
+        const analyzeBtn = document.getElementById("analyze-btn");
+        let image = new Image();
+        let startX, startY, endX, endY;
+        let isDrawing = false;
 
+        input.addEventListener("change", updateImageDisplay);
 
-</body>
+        function updateImageDisplay() {
+            while (preview.firstChild) {
+                preview.removeChild(preview.firstChild);
+            }
 
-<script>
-    const input = document.querySelector("input");
-    const preview = document.querySelector(".preview");
-    const canvas = document.getElementById("image-canvas");
-    const ctx = canvas.getContext("2d");
-    const analyzeBtn = document.getElementById("analyze-btn");
-    let image = new Image();
-    let startX, startY, endX, endY;
-    let isDrawing = false;
-
-    input.addEventListener("change", updateImageDisplay);
-
-    function updateImageDisplay() {
-        while (preview.firstChild) {
-            preview.removeChild(preview.firstChild);
-        }
-
-        const curFiles = input.files;
-        if (curFiles.length === 0) {
-            const para = document.createElement("p");
-            para.textContent = "No files currently selected for upload";
-            preview.appendChild(para);
-        } else {
-            for (let i = 0; i < curFiles.length; i++) {
-                const file = curFiles[i];
-                const listItem = document.createElement("li");
+            const curFiles = input.files;
+            if (curFiles.length === 0) {
                 const para = document.createElement("p");
-                if (validFileType(file)) {
-                    para.textContent = `File name: ${file.name}, file size ${returnFileSize(file.size)}.`;
-                    const imageElement = document.createElement("img");
-                    imageElement.src = URL.createObjectURL(file);
-                    imageElement.alt = imageElement.title = file.name;
+                para.textContent = "No files currently selected for upload";
+                preview.appendChild(para);
+            } else {
+                for (let i = 0; i < curFiles.length; i++) {
+                    const file = curFiles[i];
+                    const listItem = document.createElement("li");
+                    const para = document.createElement("p");
+                    if (validFileType(file)) {
+                        para.textContent = `File name: ${file.name}, file size ${returnFileSize(file.size)}.`;
+                        const imageElement = document.createElement("img");
+                        imageElement.src = URL.createObjectURL(file);
+                        imageElement.alt = imageElement.title = file.name;
 
-                    imageElement.style.maxWidth = "100px";
-                    imageElement.style.maxHeight = "100px";
+                        imageElement.style.maxWidth = "100px";
+                        imageElement.style.maxHeight = "100px";
 
-                    const removeButton = document.createElement("button");
-                    removeButton.textContent = "x";
-                    removeButton.className = "remove-btn";
-                    removeButton.addEventListener("click", function() {
-                        listItem.remove();
-                    });
+                        const removeButton = document.createElement("button");
+                        removeButton.textContent = "x";
+                        removeButton.className = "remove-btn";
+                        removeButton.addEventListener("click", function() {
+                            listItem.remove();
+                        });
 
-                    listItem.appendChild(imageElement);
-                    listItem.appendChild(removeButton);
-                    listItem.appendChild(para);
+                        listItem.appendChild(imageElement);
+                        listItem.appendChild(removeButton);
+                        listItem.appendChild(para);
 
-                    preview.appendChild(listItem);
+                        preview.appendChild(listItem);
 
-                    // Display the image on the canvas
-                    image.src = URL.createObjectURL(file);
-                    image.onload = function() {
-                        canvas.width = image.width;
-                        canvas.height = image.height;
-                        ctx.drawImage(image, 0, 0);
-                    };
-                } else {
-                    para.textContent = `File name: ${file.name}: Not a valid file type. Update your selection.`;
-                    preview.appendChild(para);
+                        // Display the image on the canvas
+                        image.src = URL.createObjectURL(file);
+                        image.onload = function() {
+                            canvas.width = image.width;
+                            canvas.height = image.height;
+                            ctx.drawImage(image, 0, 0);
+                        };
+                    } else {
+                        para.textContent = `File name: ${file.name}: Not a valid file type. Update your selection.`;
+                        preview.appendChild(para);
+                    }
                 }
             }
         }
-    }
 
-    canvas.addEventListener("mousedown", (e) => {
-        startX = e.offsetX;
-        startY = e.offsetY;
-        isDrawing = true;
-    });
+        canvas.addEventListener("mousedown", (e) => {
+            startX = e.offsetX;
+            startY = e.offsetY;
+            isDrawing = true;
+        });
 
-    canvas.addEventListener("mousemove", (e) => {
-        if (isDrawing) {
-            endX = e.offsetX;
-            endY = e.offsetY;
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            ctx.drawImage(image, 0, 0);
-            ctx.beginPath();
-            ctx.rect(startX, startY, endX - startX, endY - startY);
-            ctx.lineWidth = 2;
-            ctx.strokeStyle = 'red';
-            ctx.stroke();
+        canvas.addEventListener("mousemove", (e) => {
+            if (isDrawing) {
+                endX = e.offsetX;
+                endY = e.offsetY;
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                ctx.drawImage(image, 0, 0);
+                ctx.beginPath();
+                ctx.rect(startX, startY, endX - startX, endY - startY);
+                ctx.lineWidth = 2;
+                ctx.strokeStyle = 'red';
+                ctx.stroke();
+            }
+        });
+
+        canvas.addEventListener("mouseup", (e) => {
+            isDrawing = false;
+        });
+
+        analyzeBtn.addEventListener("click", () => {
+            const roi = {
+                startX: startX,
+                startY: startY,
+                endX: endX,
+                endY: endY
+            };
+            const spectrumType = document.querySelector('input[name="spectrum_type"]:checked').value;
+            fetch("/analyze", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ roi: roi, image: canvas.toDataURL(), spectrum_type: spectrumType })
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log("Analysis results:", data);
+                const resultsContainer = document.createElement("div");
+                resultsContainer.innerHTML = `<h3>Analysis Results</h3><pre>${JSON.stringify(data, null, 2)}</pre>`;
+                document.body.appendChild(resultsContainer);
+            })
+            .catch(error => console.error("Error:", error));
+        });
+
+        const fileTypes = [
+            "image/apng",
+            "image/bmp",
+            "image/gif",
+            "image/jpeg",
+            "image/pjpeg",
+            "image/png",
+            "image/svg+xml",
+            "image/tiff",
+            "image/webp",
+            "image/x-icon"
+        ];
+
+        function validFileType(file) {
+            return fileTypes.includes(file.type);
         }
-    });
 
-    canvas.addEventListener("mouseup", (e) => {
-        isDrawing = false;
-    });
-
-    analyzeBtn.addEventListener("click", () => {
-        const roi = {
-            startX: startX,
-            startY: startY,
-            endX: endX,
-            endY: endY
-        };
-        fetch("/analyze", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({ roi: roi, image: canvas.toDataURL() })
-        })
-        .then(response => response.json())
-        .then(data => {
-            console.log("Analysis results:", data);
-            console.log("Analysis results:", data);
-            // Display analysis results on the page
-            const resultsContainer = document.createElement("div");
-            resultsContainer.innerHTML = `<h3>Analysis Results</h3><pre>${JSON.stringify(data, null, 2)}</pre>`;
-            document.body.appendChild(resultsContainer);
-        })
-        .catch(error => console.error("Error:", error));
-    });
-
-    const fileTypes = [
-        "image/apng",
-        "image/bmp",
-        "image/gif",
-        "image/jpeg",
-        "image/pjpeg",
-        "image/png",
-        "image/svg+xml",
-        "image/tiff",
-        "image/webp",
-        "image/x-icon"
-    ];
-
-    function validFileType(file) {
-        return fileTypes.includes(file.type);
-    }
-
-    function returnFileSize(number) {
-        if (number < 1024) {
-            return `${number} bytes`;
-        } else if (number >= 1024 && number < 1048576) {
-            return `${(number / 1024).toFixed(1)} KB`;
-        } else if (number >= 1048576) {
-            return `${(number / 1048576).toFixed(1)} MB`;
+        function returnFileSize(number) {
+            if (number < 1024) {
+                return `${number} bytes`;
+            } else if (number >= 1024 && number < 1048576) {
+                return `${(number / 1024).toFixed(1)} KB`;
+            } else if (number >= 1048576) {
+                return `${(number / 1048576).toFixed(1)} MB`;
+            }
         }
-    }
-</script>
+    </script>
 
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
 </body>
+
 </html>

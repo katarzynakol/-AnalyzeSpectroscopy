@@ -90,6 +90,7 @@ def analyze():
     data = request.get_json()
     roi = data['roi']
     image_data = data['image']
+    spectrum_type = data['spectrum_type']
 
     # Decode the image data
     image_data = base64.b64decode(image_data.split(",")[1])
@@ -99,7 +100,14 @@ def analyze():
     # Extract the region of interest
     roi_image = image_array[roi['startY']:roi['endY'], roi['startX']:roi['endX']]
 
-    # Analyze the ROI
+    if spectrum_type == 'IR':
+        result = analyze_ir_spectrum(roi_image)
+    elif spectrum_type == 'NMR':
+        result = analyze_nmr_spectrum(roi_image)
+
+    return jsonify(result)
+
+def analyze_ir_spectrum(roi_image):
     spectrum = np.sum(roi_image, axis=0)
     spectrum_normalized = 100 * (spectrum - np.min(spectrum)) / (np.max(spectrum) - np.min(spectrum))
     smoothed_spectrum = savgol_filter(spectrum_normalized, window_length=51, polyorder=3)
@@ -111,11 +119,28 @@ def analyze():
     detected_minima = x_values[valid_minima]
     minima_intensities = smoothed_spectrum[valid_minima]
 
-    result = {
+    return {
         'minima_positions': detected_minima.tolist(),
         'minima_intensities': minima_intensities.tolist()
     }
-    return jsonify(result)
+
+def analyze_nmr_spectrum(roi_image):
+    # Implementacja analizy widma NMR 1H
+    spectrum = np.sum(roi_image, axis=0)
+    spectrum_normalized = 100 * (spectrum - np.min(spectrum)) / (np.max(spectrum) - np.min(spectrum))
+    smoothed_spectrum = savgol_filter(spectrum_normalized, window_length=51, polyorder=3)
+    inverted_spectrum = np.max(smoothed_spectrum) - smoothed_spectrum
+    minima, _ = find_peaks(inverted_spectrum, height=np.max(inverted_spectrum) * 0.1, distance=20)
+    boundary_margin = 50
+    valid_minima = minima[(minima > boundary_margin) & (minima < (len(spectrum) - boundary_margin))]
+    x_values = np.linspace(12, 0, len(spectrum))  # Typowy zakres dla 1H NMR w ppm
+    detected_minima = x_values[valid_minima]
+    minima_intensities = smoothed_spectrum[valid_minima]
+
+    return {
+        'minima_positions': detected_minima.tolist(),
+        'minima_intensities': minima_intensities.tolist()
+    }
 
 if __name__ == '__main__':
     app.run(debug=True)
