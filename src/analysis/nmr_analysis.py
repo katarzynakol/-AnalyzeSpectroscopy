@@ -1,41 +1,74 @@
-# nmr_analysis.py
-
 import cv2
 import numpy as np
-from scipy.signal import find_peaks
+import matplotlib.pyplot as plt
+
+image = cv2.imread(roi_image, cv2.IMREAD_GRAYSCALE)
+
+# Invert the image colors (white to black and black to white)
+inverted_image = cv2.bitwise_not(image)
+
+# Find the horizontal line
+horizontal_projection = np.sum(inverted_image, axis=1)
+horizontal_line_y = np.argmax(horizontal_projection)
+
+# Define the ppm range (you need to set this according to your data)
+ppm_min = x_scale_right  # Replace with the minimum ppm value
+ppm_max = x_scale_left  # Replace with the maximum ppm value
+image_width = inverted_image.shape[1]
+
+# Define margins to exclude from analysis
+margin_percentage = 0.05
+start_margin = int(margin_percentage * image_width)
+end_margin = int((1 - margin_percentage) * image_width)
 
 
-def analyse_nmr_image(image_path):
-    # Wczytanie obrazu
-    image = cv2.imread(image_path, cv2.IMREAD_GRAYSCALE)
+# Function to convert x-coordinate to ppm value
+def x_to_ppm(x, image_width, ppm_min, ppm_max):
+    return ppm_max - (x / image_width) * (ppm_max - ppm_min)
 
-    # Odwrócenie kolorów
-    inverted_image = cv2.bitwise_not(image)
 
-    # Sumowanie wartości pikseli wzdłuż osi Y
-    signal = np.sum(inverted_image, axis=0)
+# Traverse the line from right to left and find the highest peaks, excluding margins
+peak_positions = []
+x_positions = []
+ppm_values = []
 
-    # Znajdowanie pików
-    peaks, _ = find_peaks(signal, height=np.max(signal) * 0.3)
+for x in range(end_margin - 1, start_margin - 1, -1):
+    column = inverted_image[:, x]
+    max_value = column.max()
+    peaks = np.where(column == max_value)[0]
+    if len(peaks) > 0:
+        highest_peak_y = peaks[0]
+        peak_positions.append(highest_peak_y)
+        x_positions.append(x)
+        ppm_values.append(x_to_ppm(x, image_width, ppm_min, ppm_max))
 
-    # Skala ppm
-    max_ppm = 10
-    ppm_scale = np.linspace(0, max_ppm, inverted_image.shape[1])
-    peaks_ppm = ppm_scale[peaks]
+# Identify the most significant peaks based on y-coordinate differences
+peak_positions = np.array(peak_positions)
+x_positions = np.array(x_positions)
+ppm_values = np.array(ppm_values)
 
-    # Skala Hz
-    hz_per_ppm = 400
-    peaks_hz = peaks_ppm * hz_per_ppm
+# Calculate the differences in y-coordinates
+differences = np.abs(np.diff(peak_positions))
+significant_indices = np.where(differences > np.mean(differences))[0]
 
-    # Intensywność
-    intensity = signal[peaks]
+# Include the last peak as well, since diff reduces the length by 1
+significant_indices = np.append(significant_indices, significant_indices[-1] + 1)
 
-    return peaks_ppm, peaks_hz, intensity
+# Ensure the longest peak is included and identified as the peak with the highest intensity
+longest_peak_index = np.argmax(peak_positions)
+if longest_peak_index not in significant_indices:
+    significant_indices = np.append(significant_indices, longest_peak_index)
 
-def compare_with_database(peaks_ppm, peaks_hz, intensity, database):
-    matches = []
-    for entry in database:
-        for ppm, hz, intensity_value in zip(peaks_ppm, peaks_hz, intensity):
-            if np.isclose(ppm, entry['ppm'], atol=0.1) and np.isclose(hz, entry['hz'], atol=10):
-                matches.append(entry)
-    return matches
+# Calculate intensity
+intensity_values = (1000 * (peak_positions.max() - peak_positions[significant_indices])) // peak_positions.max()
+intensity_values = 1000 - intensity_values  # Adjust to have the longest peak as 1000
+intensity_values[np.argmax(intensity_values)] = 1000  # Ensure the longest peak is set to 1000
+
+# Print the values of the significant peaks
+print("Significant peaks:")
+for ppm, intensity in zip(ppm_values[significant_indices], intensity_values):
+    print(f"PPM: {ppm:.2f}, Intensity: {intensity}")
+
+
+
+

@@ -5,11 +5,83 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Spectral Tables - SpectraAnalyzer</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f8f9fa;
+            color: #343a40;
+        }
+
+        .header {
+            background: linear-gradient(to right, #4b79a1, #283e51);
+            color: white;
+            padding: 60px 0;
+            text-align: center;
+        }
+
+        .header h1 {
+            margin-bottom: 20px;
+        }
+
+        .content {
+            margin: 20px 0;
+        }
+
+        .feature-box {
+            background-color: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .feature-box h3 {
+            margin-bottom: 15px;
+        }
+
+        .feature-box img {
+            max-width: 100%;
+            border-radius: 10px;
+            margin-bottom: 15px;
+        }
+
+        .footer {
+            background-color: #343a40;
+            color: white;
+            padding: 20px 0;
+            text-align: center;
+            margin-top: 40px;
+        }
+
+        .footer a {
+            color: #007bff;
+            text-decoration: none;
+        }
+
+        .footer a:hover {
+            text-decoration: underline;
+        }
+
+        .spectral-table {
+            width: 100%;
+            margin: 20px 0;
+        }
+
+        .spectral-table th, .spectral-table td {
+            padding: 10px;
+            text-align: left;
+        }
+
+        .spectral-table th {
+            background-color: #4b79a1;
+            color: white;
+        }
+    </style>
 </head>
 <body>
 
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-    <a class="navbar-brand" >SpectraAnalyzer</a>
+    <a class="navbar-brand">SpectraAnalyzer</a>
     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
     </button>
@@ -31,27 +103,146 @@
     </div>
 </nav>
 
-<div class="container mt-4">
-    <h1 class="text-center mb-4">Spectral Tables</h1>
+<header class="header">
+    <h1>Spectral Tables</h1>
+    <p>Your comprehensive resource for spectroscopic data</p>
+</header>
 
-    <div class="row">
-        <div class="col-md-4">
-            <h2>NMR Spectroscopy</h2>
-            <p>Nuclear Magnetic Resonance (NMR) spectroscopy is a technique used to determine the chemical structure and purity of compounds. It is based on the principle that certain atomic nuclei have magnetic properties.</p>
-            <!-- Dodaj tutaj więcej informacji na temat NMR spectroscopy -->
-        </div>
-        <div class="col-md-4">
-            <h2>IR Spectroscopy</h2>
-            <p>Infrared (IR) spectroscopy is a technique used to analyze the chemical bonds present in a compound. It measures the absorption of infrared radiation by the sample, which is related to the vibrational modes of the chemical bonds.</p>
-            <!-- Dodaj tutaj więcej informacji na temat IR spectroscopy -->
-        </div>
-        <div class="col-md-4">
-            <h2>Mass Spectroscopy</h2>
-            <p>Mass Spectrometry is a technique used to identify the mass and structure of chemical compounds. It ionizes chemical species and sorts the ions based on their mass-to-charge ratio.</p>
-            <!-- Dodaj tutaj więcej informacji na temat Mass Spectroscopy -->
-        </div>
+<div class="container content">
+    <div class="feature-box">
+        <h3>NMR Spectroscopy</h3>
+        <p>Nuclear Magnetic Resonance (NMR) spectroscopy is a technique used to determine the chemical structure and purity of compounds. It is based on the principle that certain atomic nuclei have magnetic properties.</p>
+        <img src="https://www.chem.ucalgary.ca/courses/351/Carey5th/useful/nmr1.gif" alt="NMR Spectroscopy">
+        <p>Key features of NMR spectroscopy:</p>
+        <ul>
+            <li>Determines molecular structure by analyzing the magnetic properties of atomic nuclei.</li>
+            <li>Useful in identifying the carbon-hydrogen framework of organic compounds.</li>
+            <li>Commonly used nuclei: <sup>1</sup>H, <sup>13</sup>C.</li>
+        </ul>
+        <h4>Example NMR Spectral Table</h4>
+        <table class="spectral-table">
+            <thead>
+                <tr>
+                    <th>Chemical Shift (ppm)</th>
+                    <th>Multiplicity</th>
+                    <th>Integration</th>
+                    <th>Assignment</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>0.9</td>
+                    <td>Triplet</td>
+                    <td>3H</td>
+                    <td>-CH<sub>3</sub></td>
+                </tr>
+                <tr>
+                    <td>1.3</td>
+                    <td>Singlet</td>
+                    <td>2H</td>
+                    <td>-CH<sub>2</sub>-</td>
+                </tr>
+                <tr>
+                    <td>7.2</td>
+                    <td>Multiplet</td>
+                    <td>5H</td>
+                    <td>Aromatic H</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="feature-box">
+        <h3>IR Spectroscopy</h3>
+        <p>Infrared (IR) spectroscopy is a technique used to analyze the chemical bonds present in a compound. It measures the absorption of infrared radiation by the sample, which is related to the vibrational modes of the chemical bonds.</p>
+        <img src="https://media.cheggcdn.com/media/132/1325fe3d-f93e-4e5a-a8d2-8c7e570220cb/phpI99xIG.png" alt="IR Spectroscopy">
+        <p>Key features of IR spectroscopy:</p>
+        <ul>
+            <li>Identifies functional groups based on absorption of IR radiation.</li>
+            <li>Useful in determining molecular structure and identifying compounds.</li>
+            <li>Provides a fingerprint region unique to each compound.</li>
+        </ul>
+        <h4>Example IR Spectral Table</h4>
+        <table class="spectral-table">
+            <thead>
+                <tr>
+                    <th>Wavenumber (cm<sup>-1</sup>)</th>
+                    <th>Intensity</th>
+                    <th>Assignment</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>3200-3600</td>
+                    <td>Strong, Broad</td>
+                    <td>O-H Stretch</td>
+                </tr>
+                <tr>
+                    <td>2850-2950</td>
+                    <td>Strong</td>
+                    <td>C-H Stretch</td>
+                </tr>
+                <tr>
+                    <td>1650</td>
+                    <td>Strong</td>
+                    <td>C=O Stretch</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="feature-box">
+        <h3>Mass Spectrometry</h3>
+        <p>Mass Spectrometry is a technique used to identify the mass and structure of chemical compounds. It ionizes chemical species and sorts the ions based on their mass-to-charge ratio.</p>
+        <img src="https://chem.libretexts.org/@api/deki/files/84344/Roberts_and_Caserio_Screenshot_9-11-3.png?revision=1&size=bestfit&width=388&height=262" alt="Mass Spectrometry">
+        <p>Key features of Mass Spectrometry:</p>
+        <ul>
+            <li>Determines molecular weight and structure of compounds.</li>
+            <li>Provides information about the molecular formula.</li>
+            <li>Useful in identifying unknown compounds and analyzing complex mixtures.</li>
+        </ul>
+        <h4>Example Mass Spectral Table</h4>
+        <table class="spectral-table">
+            <thead>
+                <tr>
+                    <th>m/z</th>
+                    <th>Relative Abundance (%)</th>
+                    <th>Assignment</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>15</td>
+                    <td>5</td>
+                    <td>CH<sub>3</sub><sup>+</sup></td>
+                </tr>
+                <tr>
+                    <td>29</td>
+                    <td>10</td>
+                    <td>C<sub>2</sub>H<sub>5</sub><sup>+</sup></td>
+                </tr>
+                <tr>
+                    <td>44</td>
+                    <td>100</td>
+                    <td>CO<sub>2</sub><sup>+</sup></td>
+                </tr>
+            </tbody>
+        </table>
     </div>
 </div>
+
+<footer class="footer">
+    <div class="container">
+        <p class="mb-0">&copy; 2024 SpectraAnalyzer. All rights reserved.</p>
+        <p class="mb-0">Contact us: <a href="mailto:info@spectraanalyzer.com">info@spectraanalyzer.com</a></p>
+        <p class="mb-0"><a href="/privacy-policy">Privacy Policy</a> | <a href="/terms-of-service">Terms of Service</a></p>
+        <p class="mb-0">Follow us on:
+            <a href="https://facebook.com/spectraanalyzer" target="_blank">Facebook</a>,
+            <a href="https://twitter.com/spectraanalyzer" target="_blank">Twitter</a>,
+            <a href="https://instagram.com/spectraanalyzer" target="_blank">Instagram</a>
+        </p>
+    </div>
+</footer>
 
 <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>

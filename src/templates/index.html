@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SpectraAnalyzer</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="icon" href="../upload/favicon.ico" type="image/x-icon">
     <style>
         #drop-area {
             border: 2px dashed #ccc;
@@ -84,6 +85,23 @@
             text-align: center;
             margin-top: 20px;
         }
+        .footer {
+            background-color: #343a40;
+            color: white;
+            padding: 20px 0;
+            text-align: center;
+            margin-top: 40px;
+        }
+
+        .footer a {
+            color: #007bff;
+            text-decoration: none;
+        }
+
+        .footer a:hover {
+            text-decoration: underline;
+        }
+
     </style>
 </head>
 
@@ -122,7 +140,7 @@
     <div class="row mt-4 justify-content-center">
         <div class="col-md-6">
             <div class="card">
-                <div class="card-header">
+                <div class="card-header text-center">
                     Upload Spectroscopic Data
                 </div>
                 <form id="upload-form" action="{{ url_for('upload_file') }}" method="post" enctype="multipart/form-data">
@@ -135,9 +153,9 @@
                     </div>
                     <div class="form-group text-center mb-3">
                         <label>Select Spectrum Type:</label><br>
-                        <input type="radio" id="ir" name="spectrum_type" value="IR" checked>
+                        <input type="radio" id="ir" name="spectrum_type" value="IR" checked onclick="changeScaleInput(true)">
                         <label for="ir">IR</label><br>
-                        <input type="radio" id="nmr" name="spectrum_type" value="NMR">
+                        <input type="radio" id="nmr" name="spectrum_type" value="NMR" onclick="changeScaleInput(false)">
                         <label for="nmr">1H NMR</label>
                     </div>
                     <div class="preview mb-3 text-center">
@@ -148,156 +166,286 @@
         </div>
     </div>
 
-    <div class="image-canvas-container">
-        <canvas id="image-canvas" class="image-canvas"></canvas>
-        <button id="analyze-btn" class="btn btn-primary mt-3">Analyze Selected Area</button>
+<div class="row mt-4 justify-content-center">
+    <div class="col-md-6">
+        <div class="image-canvas-container">
+            <div class="card">
+                <div class="card-header">
+                    Select an area of the spectrum
+                </div>
+                <canvas id="image-canvas" class="image-canvas"></canvas>
+                <br>
+                <div><label>X SCALE:</label>
+                    <input type="number" id="xScaleLeft" name="xScaleLeft" placeholder=left>
+                    <input type="number" id="xScaleRight" name="xScaleRight" placeholder=right>
+                </div>
+                <div><label>Y SCALE:</label>
+                    <input type="number" id="yScaleMin" name="yScaleMin" placeholder=min>
+                    <input type="number" id="yScaleMax" name="yScaleMax" placeholder=max>
+                </div>
+                <button id="analyze-btn" class="btn btn-primary mt-3">Analyze Selected Area</button>
+            </div>
+        </div>
     </div>
+</div>
 
-    <script>
-        const input = document.querySelector("input[type='file']");
-        const preview = document.querySelector(".preview");
-        const canvas = document.getElementById("image-canvas");
-        const ctx = canvas.getContext("2d");
-        const analyzeBtn = document.getElementById("analyze-btn");
-        let image = new Image();
-        let startX, startY, endX, endY;
-        let isDrawing = false;
+<p></p>
 
-        input.addEventListener("change", updateImageDisplay);
+<script>
+const input = document.querySelector("input[type='file']");
+const preview = document.querySelector(".preview");
+const canvas = document.getElementById("image-canvas");
+const ctx = canvas.getContext("2d");
+const analyzeBtn = document.getElementById("analyze-btn");
+let image = new Image();
+let startX, startY, endX, endY;
+let isDrawing = false;
 
-        function updateImageDisplay() {
-            while (preview.firstChild) {
-                preview.removeChild(preview.firstChild);
-            }
+input.addEventListener("change", updateImageDisplay);
 
-            const curFiles = input.files;
-            if (curFiles.length === 0) {
-                const para = document.createElement("p");
-                para.textContent = "No files currently selected for upload";
-                preview.appendChild(para);
+function changeScaleInput(isIr){
+    if(isIr){
+       document.getElementById('yScaleMin').disabled = false
+       document.getElementById('yScaleMax').disabled = false
+    }
+    else{
+        document.getElementById('yScaleMin').disabled = true
+        document.getElementById('yScaleMax').disabled = true
+        document.getElementById('yScaleMin').value = ""
+        document.getElementById('yScaleMax').value = ""
+    }
+}
+
+function updateImageDisplay() {
+    while (preview.firstChild) {
+        preview.removeChild(preview.firstChild);
+    }
+
+    const curFiles = input.files;
+    if (curFiles.length === 0) {
+        const para = document.createElement("p");
+        para.textContent = "No files currently selected for upload";
+        preview.appendChild(para);
+    } else {
+        for (let i = 0; i < curFiles.length; i++) {
+            const file = curFiles[i];
+            const listItem = document.createElement("li");
+            const para = document.createElement("p");
+            if (validFileType(file)) {
+                para.textContent = `File name: ${file.name}, file size ${returnFileSize(file.size)}.`;
+                const imageElement = document.createElement("img");
+                imageElement.src = URL.createObjectURL(file);
+                imageElement.alt = imageElement.title = file.name;
+
+                imageElement.style.maxWidth = "100px";
+                imageElement.style.maxHeight = "100px";
+
+                const removeButton = document.createElement("button");
+                removeButton.textContent = "x";
+                removeButton.className = "remove-btn";
+                removeButton.addEventListener("click", function() {
+                    listItem.remove();
+                });
+
+                listItem.appendChild(imageElement);
+                listItem.appendChild(removeButton);
+                listItem.appendChild(para);
+
+                preview.appendChild(listItem);
+
+                // Display the image on the canvas
+                image.src = URL.createObjectURL(file);
+                image.onload = function() {
+                    canvas.width = image.width;
+                    canvas.height = image.height;
+                    ctx.drawImage(image, 0, 0);
+                };
             } else {
-                for (let i = 0; i < curFiles.length; i++) {
-                    const file = curFiles[i];
-                    const listItem = document.createElement("li");
-                    const para = document.createElement("p");
-                    if (validFileType(file)) {
-                        para.textContent = `File name: ${file.name}, file size ${returnFileSize(file.size)}.`;
-                        const imageElement = document.createElement("img");
-                        imageElement.src = URL.createObjectURL(file);
-                        imageElement.alt = imageElement.title = file.name;
-
-                        imageElement.style.maxWidth = "100px";
-                        imageElement.style.maxHeight = "100px";
-
-                        const removeButton = document.createElement("button");
-                        removeButton.textContent = "x";
-                        removeButton.className = "remove-btn";
-                        removeButton.addEventListener("click", function() {
-                            listItem.remove();
-                        });
-
-                        listItem.appendChild(imageElement);
-                        listItem.appendChild(removeButton);
-                        listItem.appendChild(para);
-
-                        preview.appendChild(listItem);
-
-                        // Display the image on the canvas
-                        image.src = URL.createObjectURL(file);
-                        image.onload = function() {
-                            canvas.width = image.width;
-                            canvas.height = image.height;
-                            ctx.drawImage(image, 0, 0);
-                        };
-                    } else {
-                        para.textContent = `File name: ${file.name}: Not a valid file type. Update your selection.`;
-                        preview.appendChild(para);
-                    }
-                }
+                para.textContent = `File name: ${file.name}: Not a valid file type. Update your selection.`;
+                preview.appendChild(para);
             }
         }
+    }
+}
 
-        canvas.addEventListener("mousedown", (e) => {
-            startX = e.offsetX;
-            startY = e.offsetY;
-            isDrawing = true;
-        });
+function getMousePos(canvas, evt) {
+    var rect = canvas.getBoundingClientRect();
+    return {
+        x: (evt.clientX - rect.left) * (canvas.width / rect.width),
+        y: (evt.clientY - rect.top) * (canvas.height / rect.height)
+    };
+}
 
-        canvas.addEventListener("mousemove", (e) => {
-            if (isDrawing) {
-                endX = e.offsetX;
-                endY = e.offsetY;
-                ctx.clearRect(0, 0, canvas.width, canvas.height);
-                ctx.drawImage(image, 0, 0);
-                ctx.beginPath();
-                ctx.rect(startX, startY, endX - startX, endY - startY);
-                ctx.lineWidth = 2;
-                ctx.strokeStyle = 'red';
-                ctx.stroke();
-            }
-        });
+canvas.addEventListener("mousedown", (e) => {
+    const pos = getMousePos(canvas, e);
+    startX = pos.x;
+    startY = pos.y;
+    isDrawing = true;
+});
 
-        canvas.addEventListener("mouseup", (e) => {
-            isDrawing = false;
-        });
+canvas.addEventListener("mousemove", (e) => {
+    if (isDrawing) {
+        const pos = getMousePos(canvas, e);
+        endX = pos.x;
+        endY = pos.y;
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.drawImage(image, 0, 0);
+        ctx.beginPath();
+        ctx.rect(startX, startY, endX - startX, endY - startY);
+        ctx.lineWidth = 2;
+        ctx.strokeStyle = 'red';
+        ctx.stroke();
+    }
+});
 
-        analyzeBtn.addEventListener("click", () => {
-            const roi = {
-                startX: startX,
-                startY: startY,
-                endX: endX,
-                endY: endY
-            };
-            const spectrumType = document.querySelector('input[name="spectrum_type"]:checked').value;
-            fetch("/analyze", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({ roi: roi, image: canvas.toDataURL(), spectrum_type: spectrumType })
-            })
-            .then(response => response.json())
-            .then(data => {
-                console.log("Analysis results:", data);
-                const resultsContainer = document.createElement("div");
-                resultsContainer.innerHTML = `<h3>Analysis Results</h3><pre>${JSON.stringify(data, null, 2)}</pre>`;
-                document.body.appendChild(resultsContainer);
-            })
-            .catch(error => console.error("Error:", error));
-        });
+canvas.addEventListener("mouseup", (e) => {
+    isDrawing = false;
+});
 
-        const fileTypes = [
-            "image/apng",
-            "image/bmp",
-            "image/gif",
-            "image/jpeg",
-            "image/pjpeg",
-            "image/png",
-            "image/svg+xml",
-            "image/tiff",
-            "image/webp",
-            "image/x-icon"
-        ];
+analyzeBtn.addEventListener("click", () => {
+    const roi = {
+        startX: startX,
+        startY: startY,
+        endX: endX,
+        endY: endY
+    };
+    console.log("ROI coordinates:", roi);
 
-        function validFileType(file) {
-            return fileTypes.includes(file.type);
+    const spectrumType = document.querySelector('input[name="spectrum_type"]:checked')?.value;
+    if (!spectrumType) {
+        alert("Please select a spectrum type.");
+        return;
+    }
+
+    let xScaleLeft = document.getElementById('xScaleLeft').value;
+    let xScaleRight = document.getElementById('xScaleRight').value;
+    let yScaleMin = document.getElementById('yScaleMin').value;
+    let yScaleMax = document.getElementById('yScaleMax').value;
+
+    fetch("/analyze", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            roi: roi,
+            image: canvas.toDataURL(),
+            spectrum_type: spectrumType,
+            x_scale_left: xScaleLeft,
+            x_scale_right: xScaleRight,
+            y_scale_min: yScaleMin,
+            y_scale_max: yScaleMax
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        console.log("Analysis results:", data);
+
+        const resultsContainer = document.createElement("div");
+        resultsContainer.innerHTML = `<h3>Analysis Results (${spectrumType})</h3>`;
+
+        let table = '<table border="1" cellpadding="5" cellspacing="0">';
+        table += '<tr><th>Parameter</th><th>Value</th></tr>';
+
+        table += `<tr><td>x_scale_left</td><td>${xScaleLeft}</td></tr>`;
+        table += `<tr><td>x_scale_right</td><td>${xScaleRight}</td></tr>`;
+
+        if (spectrumType === 'IR') {
+            table += `<tr><td>y_scale_min</td><td>${yScaleMin}</td></tr>`;
+            table += `<tr><td>y_scale_max</td><td>${yScaleMax}</td></tr>`;
         }
 
-        function returnFileSize(number) {
-            if (number < 1024) {
-                return `${number} bytes`;
-            } else if (number >= 1024 && number < 1048576) {
-                return `${(number / 1024).toFixed(1)} KB`;
-            } else if (number >= 1048576) {
-                return `${(number / 1048576).toFixed(1)} MB`;
-            }
-        }
-    </script>
+        table += '</table>';
 
-    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+        resultsContainer.innerHTML += table;
+        resultsContainer.innerHTML += `<h4>Detailed Results</h4><pre>${JSON.stringify(data, null, 2)}</pre>`;
+
+        document.body.appendChild(resultsContainer);
+    })
+    .catch(error => console.error("Error:", error));
+});
+
+<!--analyzeBtn.addEventListener("click", () => {-->
+<!--    const roi = {-->
+<!--        startX: startX,-->
+<!--        startY: startY,-->
+<!--        endX: endX,-->
+<!--        endY: endY-->
+<!--    };-->
+<!--    console.log("ROI coordinates:", roi);-->
+<!--    const spectrumType = document.querySelector('input[name="spectrum_type"]:checked')?.value;-->
+<!--    if (!spectrumType) {-->
+<!--        alert("Please select a spectrum type.");-->
+<!--        return;-->
+<!--    }-->
+
+
+<!--    let xScaleLeft = document.getElementById('xScaleLeft').value-->
+<!--    let xScaleRight = document.getElementById('xScaleRight').value-->
+<!--    let yScaleMin = document.getElementById('yScaleMin').value-->
+<!--    let yScaleMax = document.getElementById('yScaleMax').value-->
+
+<!--    fetch("/analyze", {-->
+<!--        method: "POST",-->
+<!--        headers: {-->
+<!--            "Content-Type": "application/json"-->
+<!--        },-->
+<!--        body: JSON.stringify({-->
+<!--            roi: roi,-->
+<!--            image: canvas.toDataURL(),-->
+<!--            spectrum_type: spectrumType,-->
+<!--            x_scale_left: xScaleLeft,-->
+<!--            x_scale_right: xScaleRight,-->
+<!--            y_scale_min: yScaleMin,-->
+<!--            y_scale_max: yScaleMax-->
+<!--        })-->
+<!--    })-->
+<!--    .then(response => response.json())-->
+<!--    .then(data => {-->
+<!--        console.log("Analysis results:", data);-->
+<!--        const resultsContainer = document.createElement("div");-->
+<!--        resultsContainer.innerHTML = `<h3>Analysis Results</h3><pre>${JSON.stringify(data, null, 2)}</pre>`;-->
+<!--        document.body.appendChild(resultsContainer);-->
+<!--    })-->
+<!--    .catch(error => console.error("Error:", error));-->
+<!--});-->
+
+function validFileType(file) {
+    const fileTypes = [
+        "image/jpeg",
+        "image/pjpeg",
+        "image/png"
+    ];
+    return fileTypes.includes(file.type);
+}
+
+function returnFileSize(number) {
+    if (number < 1024) {
+        return `${number} bytes`;
+    } else if (number >= 1024 && number < 1048576) {
+        return `${(number / 1024).toFixed(1)} KB`;
+    } else if (number >= 1048576) {
+        return `${(number / 1048576).toFixed(1)} MB`;
+    }
+}
+
+</script>
+
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 
 </body>
-
+<!--    <footer class="footer">-->
+<!--        <div class="container">-->
+<!--            <p class="mb-0">&copy; 2024 SpectraAnalyzer. All rights reserved.</p>-->
+<!--            <p class="mb-0">Contact us: <a href="mailto:info@spectraanalyzer.com">info@spectraanalyzer.com</a></p>-->
+<!--            <p class="mb-0"><a href="/privacy-policy">Privacy Policy</a> | <a href="/terms-of-service">Terms of Service</a></p>-->
+<!--            <p class="mb-0">Follow us on:-->
+<!--                <a href="https://facebook.com/spectraanalyzer" target="_blank">Facebook</a>,-->
+<!--                <a href="https://twitter.com/spectraanalyzer" target="_blank">Twitter</a>,-->
+<!--                <a href="https://instagram.com/spectraanalyzer" target="_blank">Instagram</a>-->
+<!--            </p>-->
+<!--        </div>-->
+<!--    </footer>-->
 </html>

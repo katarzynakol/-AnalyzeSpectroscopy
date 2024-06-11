@@ -5,11 +5,61 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>About - SpectraAnalyzer</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f8f9fa;
+            color: #343a40;
+        }
+
+        .header {
+            background: linear-gradient(to right, #4b79a1, #283e51);
+            color: white;
+            padding: 60px 0;
+            text-align: center;
+        }
+
+        .header h1 {
+            margin-bottom: 20px;
+        }
+
+        .content {
+            margin: 20px 0;
+        }
+
+        .feature-box {
+            background-color: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .feature-box h3 {
+            margin-bottom: 15px;
+        }
+
+        .footer {
+            background-color: #343a40;
+            color: white;
+            padding: 20px 0;
+            text-align: center;
+        }
+
+        .footer a {
+            color: #007bff;
+            text-decoration: none;
+        }
+
+        .footer a:hover {
+            text-decoration: underline;
+        }
+    </style>
 </head>
 <body>
 
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-    <a class="navbar-brand" >SpectraAnalyzer</a>
+    <a class="navbar-brand">SpectraAnalyzer</a>
     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
     </button>
@@ -31,15 +81,61 @@
     </div>
 </nav>
 
-<div class="container mt-4">
-    <h1 class="text-center mb-4">About SpectraAnalyzer</h1>
+<header class="header">
+    <h1>About SpectraAnalyzer</h1>
+    <p>Your gateway to mastering spectroscopy</p>
+</header>
 
-    <p>SpectraAnalyzer is a student application designed to accelerate learning, facilitate identification, and foster a love for spectroscopy studies. The idea behind the application arose from the need for a tool that could streamline the analysis of spectroscopic data, making it more accessible and enjoyable for students.</p>
+<div class="container content">
+    <div class="feature-box">
+        <h3>Our Mission</h3>
+        <p>SpectraAnalyzer is a student-centric application designed to accelerate learning, facilitate identification, and foster a passion for spectroscopy studies. Our mission is to make spectroscopic data analysis accessible and enjoyable for students.</p>
+    </div>
 
-    <p>The main goal of SpectraAnalyzer is to provide a user-friendly interface for analyzing spectroscopic data, comparing it with standard values, and identifying organic compounds. The application aims to enhance the learning experience by offering interactive tools and resources, including spectral tables and educational materials.</p>
+    <div class="feature-box">
+        <h3>Why Spectroscopy?</h3>
+        <p>Spectroscopy is a crucial tool in chemistry and biology for understanding the molecular structure and composition of substances. Techniques such as NMR, IR, and mass spectrometry provide detailed insights that are invaluable for research and education.</p>
+        <ul>
+            <li><strong>NMR (Nuclear Magnetic Resonance)</strong>: Analyzes magnetic properties of atomic nuclei to determine molecular structure.</li>
+            <li><strong>IR (Infrared Spectroscopy)</strong>: Measures the vibration of molecules and identifies functional groups.</li>
+            <li><strong>Mass Spectrometry</strong>: Identifies compounds based on mass-to-charge ratio of ions.</li>
+        </ul>
+    </div>
 
-    <p>With SpectraAnalyzer, students can expedite their understanding of spectroscopic techniques such as NMR, IR, and mass spectrometry, gaining valuable insights into the structures and properties of organic compounds. Additionally, the application encourages exploration and experimentation, empowering students to deepen their knowledge and skills in spectroscopy.</p>
+    <div class="feature-box">
+        <h3>Key Features</h3>
+        <ul>
+            <li>User-friendly interface for easy data upload and analysis.</li>
+            <li>Comprehensive spectral tables for quick reference and comparison.</li>
+            <li>Interactive tools to explore and understand spectroscopic data.</li>
+            <li>Educational resources to enhance learning and understanding of spectroscopy.</li>
+        </ul>
+    </div>
+
+    <div class="feature-box">
+        <h3>How It Works</h3>
+        <p>Upload your spectroscopic data and select the analysis type. SpectraAnalyzer processes the data, compares it with standard values, and provides detailed insights. Students can identify organic compounds and learn about their properties interactively.</p>
+    </div>
+
+    <div class="feature-box">
+        <h3>Join Us</h3>
+        <p>Whether you are a student, educator, or researcher, SpectraAnalyzer offers tools and resources to support your spectroscopy needs. Join our community and enhance your learning experience.</p>
+        <a class="btn btn-primary" href="/contact">Get in Touch</a>
+    </div>
 </div>
+
+<footer class="footer">
+    <div class="container">
+        <p class="mb-0">&copy; 2024 SpectraAnalyzer. All rights reserved.</p>
+        <p class="mb-0">Contact us: <a href="mailto:info@spectraanalyzer.com">info@spectraanalyzer.com</a></p>
+        <p class="mb-0"><a href="/privacy-policy">Privacy Policy</a> | <a href="/terms-of-service">Terms of Service</a></p>
+        <p class="mb-0">Follow us on:
+            <a href="https://facebook.com/spectraanalyzer" target="_blank">Facebook</a>,
+            <a href="https://twitter.com/spectraanalyzer" target="_blank">Twitter</a>,
+            <a href="https://instagram.com/spectraanalyzer" target="_blank">Instagram</a>
+        </p>
+    </div>
+</footer>
 
 <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
